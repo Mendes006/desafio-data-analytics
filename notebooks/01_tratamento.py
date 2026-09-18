@@ -1,15 +1,8 @@
-"""
-Fase 1: diagnostico e tratamento da base.
-
-Decisoes tomadas (documentadas tambem no README):
-- Linhas sem PRODUTO (548, 0.11%) sao descartadas: sem produto nao ha
-  categoria nem faturamento confiavel (preco vem 0 quando produto e nulo).
-- Linhas sem CLIENTE, IDADE ou ESTADO nao sao descartadas da base geral,
-  cada analise faz dropna só nas colunas que usa. Ex.: perfil demografico
-  ignora as poucas linhas sem idade, mas uma analise de faturamento por
-  categoria nao precisa de idade e nao perde essas linhas.
-- Duplicatas exatas (3 linhas) sao removidas.
-"""
+# Tratamento da base: tirei as linhas sem produto (548, ~0.1% da base) porque
+# sem produto nao da pra saber a categoria nem confiar no faturamento (o
+# preco vem 0 quando o produto e nulo). Ja cliente/idade/estado eu deixei os
+# nulos na base mesmo, cada analise ignora so as linhas que precisam do
+# campo que falta (mais detalhe disso no README).
 import pandas as pd
 
 vendas = pd.read_parquet("../data/vendas_raw.parquet")

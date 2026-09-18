@@ -1,13 +1,6 @@
-"""
-Fase 0: conversao unica do Excel para Parquet.
-
-read_excel em 500 mil linhas leva ~15-20s por leitura. Parquet e um formato
-colunar binario: leitura fica quase instantanea e os tipos (datas, floats)
-sao preservados sem precisar reconverter toda vez que reabrimos o notebook.
-
-Rodar uma vez. O resultado fica em data/, ignorado pelo git (regeneravel
-a partir do Excel original).
-"""
+# read_excel demora demais com 500 mil linhas (uns 40s por leitura), entao
+# converto uma vez pra parquet e uso isso daqui pra frente. So precisa
+# rodar de novo se o Excel original mudar (o parquet fica fora do git).
 import time
 import pandas as pd
 

@@ -1,43 +1,28 @@
--- =====================================================================
--- Desafio Tecnico Manchester Investimentos: consultas SQL teoricas
--- Dialeto: PostgreSQL
---
--- Consultas teoricas, nao rodam contra um banco real (o enunciado nao
--- exige isso). Espelham exatamente a logica aplicada em Python
--- (notebooks/01_tratamento.py e notebooks/02_analises.py), para os
--- numeros baterem entre notebook e SQL.
+-- Consultas teoricas do desafio Manchester Investimentos, dialeto PostgreSQL.
+-- Nao rodam contra banco real (nao e exigido no enunciado), mas espelham a
+-- mesma logica do tratamento em Python (notebooks/01_tratamento.py e
+-- 02_analises.py) pra os numeros baterem entre as duas entregas.
 --
 -- Tabelas assumidas:
 --   vendas (cliente, idade, estado, produto, quantidade_vendida,
 --           preco_unitario, data_venda)
 --   categorias_produtos (produto, categoria)
 --
--- Tratamento assumido, igual ao notebook:
---   - preco_unitario e o preco unitario do produto (nao e o total da
---     linha), faturamento = quantidade_vendida * preco_unitario
---   - linhas com produto nulo sao excluidas (sem produto nao ha
---     categoria nem faturamento confiavel, ver Fase 1 do notebook)
---   - idade e estado sao atributos do cliente, entao o perfil
---     demografico (pergunta 1) usa DISTINCT por cliente, nao por
---     transacao
---   - nao existe coluna de regiao na base original, so estado. A
---     macrorregiao (Sul/Sudeste/Nordeste, padrao IBGE) e derivada via
---     CASE WHEN, igual foi feito em Python
+-- preco_unitario e por unidade, nao o total da linha, entao faturamento
+-- sempre calculo como quantidade_vendida * preco_unitario. Linhas com
+-- produto nulo ficam de fora (sem produto nao da pra saber categoria nem
+-- confiar no faturamento). Idade e estado sao do cliente, nao da transacao,
+-- entao a pergunta 1 usa DISTINCT por cliente. Nao existe coluna de regiao
+-- na base, so estado, entao derivo a macrorregiao via CASE WHEN.
 --
--- Nota de consistencia: existem 3 linhas 100% duplicadas na base bruta
--- (de 500 mil), removidas no notebook (01_tratamento.py) mas nao
--- filtradas aqui, pois SQL puro nao tem um equivalente direto ao
--- drop_duplicates() do pandas sem assumir uma chave unica. Isso gera
--- uma diferenca de <0,001% entre os totais do SQL e os do notebook,
--- desprezivel para as conclusoes, mas documentado para transparencia.
--- =====================================================================
+-- Obs: a base bruta tem 3 linhas 100% duplicadas, removidas no notebook mas
+-- nao aqui (SQL puro nao tem um drop_duplicates() direto sem assumir uma
+-- chave), entao o SQL fica com uma diferenca de <0,001% em relacao aos
+-- totais do notebook. Irrelevante pras conclusoes, so documentando.
 
 
--- =====================================================================
--- PERGUNTA 1: Perfil demografico dos clientes
--- Distribuicao de idade e regiao, calculada por cliente unico (nao por
--- transacao), pra nao enviesar pelo volume de compras de cada cliente.
--- =====================================================================
+-- Pergunta 1: perfil demografico dos clientes, por cliente unico (nao por
+-- transacao, senao um cliente que compra mais vezes pesa mais na distribuicao)
 
 WITH clientes AS (
     SELECT DISTINCT cliente, idade, estado
@@ -77,7 +62,7 @@ FROM clientes
 GROUP BY estado
 ORDER BY qtd_clientes DESC;
 
--- estatisticas gerais de idade (media, mediana, min, max)
+-- estatisticas gerais de idade
 WITH clientes AS (
     SELECT DISTINCT cliente, idade, estado
     FROM vendas
@@ -93,12 +78,9 @@ SELECT
 FROM clientes;
 
 
--- =====================================================================
--- PERGUNTA 2: Performance por categoria de produto
--- Volume, faturamento, ticket medio e Pareto (80/20) por categoria.
--- Diferencial: window functions para % do total e % acumulado sem
--- precisar de subquery separada.
--- =====================================================================
+-- Pergunta 2: performance por categoria (volume, faturamento, ticket medio
+-- e Pareto). Uso window function pra calcular % do total e % acumulado sem
+-- precisar de subquery a parte.
 
 WITH vendas_validas AS (
     SELECT v.*, c.categoria
@@ -133,11 +115,8 @@ FROM por_categoria
 ORDER BY faturamento_total DESC;
 
 
--- =====================================================================
--- PERGUNTA 3: Sazonalidade
--- Faturamento por mes e por trimestre, somando os 5 anos da base
--- (2021-2025, todos completos).
--- =====================================================================
+-- Pergunta 3: sazonalidade, faturamento por mes e por trimestre somando os
+-- 5 anos da base (2021-2025, todos completos)
 
 SELECT
     EXTRACT(MONTH FROM data_venda)::int AS mes,
@@ -156,13 +135,9 @@ GROUP BY 1
 ORDER BY 1;
 
 
--- =====================================================================
--- PERGUNTA 4: Tendencia de vendas por regiao
--- Nao ha coluna de regiao na base original, so estado. Derivo a
--- macrorregiao (padrao IBGE) via CASE WHEN, igual ao notebook.
--- Diferencial: LAG() para comparar com o ano anterior (tendencia) e
--- RANK() para ranking dinamico de regioes por ano.
--- =====================================================================
+-- Pergunta 4: tendencia por regiao. Nao ha coluna de regiao, so estado,
+-- entao derivo a macrorregiao (padrao IBGE) via CASE WHEN. Uso LAG() pra
+-- comparar com o ano anterior e RANK() pra um ranking dinamico por ano.
 
 WITH vendas_regiao AS (
     SELECT
@@ -198,7 +173,7 @@ SELECT
 FROM regiao_ano
 ORDER BY macrorregiao, ano;
 
--- resumo consolidado por regiao (faturamento total e ticket medio)
+-- resumo consolidado por regiao
 WITH vendas_regiao AS (
     SELECT
         v.*,
@@ -221,14 +196,10 @@ GROUP BY macrorregiao
 ORDER BY faturamento_total DESC;
 
 
--- =====================================================================
--- PERGUNTA 5: Relacao entre idade e categorias compradas
--- SQL monta a tabela de contingencia (contagem e % dentro de cada
--- faixa etaria). O teste estatistico de associacao (qui-quadrado e V de
--- Cramer) foi feito em Python (notebooks/02_analises.py), SQL puro nao
--- calcula isso nativamente, aqui a query gera os dados que alimentam
--- esse teste.
--- =====================================================================
+-- Pergunta 5: relacao entre idade e categoria. Aqui so monto a tabela de
+-- contingencia (contagem e % dentro de cada faixa etaria), o teste
+-- estatistico (qui-quadrado e V de Cramer) fiz em Python porque SQL puro
+-- nao calcula isso nativamente.
 
 WITH base AS (
     SELECT
