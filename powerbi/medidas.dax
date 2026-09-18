@@ -1,0 +1,29 @@
+// Medidas DAX: Desafio Manchester Investimentos
+// Criar cada uma em Modelagem > Nova Medida, na tabela "vendas"
+// Comentario com // explica o que a medida faz e por que
+
+// KPI principal: soma direta da coluna ja calculada em Python
+// (quantidade_vendida * preco_unitario), evita recalcular no DAX
+Faturamento Total = SUM(vendas[faturamento])
+
+// Volume total de unidades vendidas
+Volume Total = SUM(vendas[quantidade_vendida])
+
+// Ticket medio por transacao (linha da base), nao por cliente
+Ticket Medio = DIVIDE([Faturamento Total], COUNTROWS(vendas))
+
+// Numero de transacoes (linhas), util pra comparar com volume
+Qtd Transacoes = COUNTROWS(vendas)
+
+// Clientes unicos, DISTINCTCOUNT evita contar o mesmo cliente
+// mais de uma vez (cada cliente aparece em varias linhas de venda)
+Qtd Clientes = DISTINCTCOUNT(vendas[cliente])
+
+// % que a categoria selecionada representa do faturamento total,
+// ALLSELECTED ignora o filtro de categoria mas respeita outros
+// filtros ativos (ex: slicer de ano), usado no grafico de Pareto
+% do Faturamento Total =
+DIVIDE(
+    [Faturamento Total],
+    CALCULATE([Faturamento Total], ALLSELECTED(categorias_produtos[categoria]))
+)
