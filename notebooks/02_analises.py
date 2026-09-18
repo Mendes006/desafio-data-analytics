@@ -91,7 +91,7 @@ fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
 
 cat_perf_sorted = cat_perf.sort_values("faturamento_total")
 axes[0].barh(cat_perf_sorted.index, cat_perf_sorted["faturamento_total"] / 1e6, color="#4C72B0")
-axes[0].set_title("Faturamento por categoria (R$ milhões)")
+axes[0].set_title("Jardinagem e Utilidades Domésticas lideram o faturamento")
 axes[0].set_xlabel("R$ milhões")
 
 order = cat_perf.index
@@ -100,7 +100,7 @@ ax2.bar(order, cat_perf.loc[order, "pct_faturamento"], color="#55A868", label="%
 ax2b = ax2.twinx()
 ax2b.plot(order, cat_perf.loc[order, "pct_acumulado"], color="red", marker="o", label="% acumulado")
 ax2b.axhline(80, color="gray", linestyle="--", linewidth=1)
-ax2.set_title("Pareto de categorias (80/20)")
+ax2.set_title("3 de 5 categorias já somam quase 80% da receita")
 ax2.tick_params(axis="x", rotation=20)
 
 plt.tight_layout()
@@ -137,11 +137,11 @@ trimestre_perf = df.groupby("trimestre")["faturamento"].sum()
 
 fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
 sns.barplot(x=mes_perf.index, y=mes_perf.values / 1e6, ax=axes[0], color="#8172B2")
-axes[0].set_title("Faturamento por mês (soma de 2021-2025, R$ milhões)")
+axes[0].set_title("Sem pico sazonal forte: só 8% de variação entre meses")
 axes[0].set_xlabel("mês")
 
 sns.barplot(x=trimestre_perf.index, y=trimestre_perf.values / 1e6, ax=axes[1], color="#CCB974")
-axes[1].set_title("Faturamento por trimestre (R$ milhões)")
+axes[1].set_title("4º trimestre supera o 2º em ~18%, sem grande destaque")
 axes[1].set_xlabel("trimestre")
 
 plt.tight_layout()
@@ -172,7 +172,7 @@ regiao_ano = df.dropna(subset=["macrorregiao"]).groupby(["ano", "macrorregiao"])
 plt.figure(figsize=(10, 5))
 for regiao in regiao_ano.columns:
     plt.plot(regiao_ano.index, regiao_ano[regiao] / 1e6, marker="o", label=regiao)
-plt.title("Evolução do faturamento por região (R$ milhões/ano)")
+plt.title("Faturamento regional estável nos últimos 5 anos, sem tendência clara")
 plt.xlabel("ano")
 plt.ylabel("R$ milhões")
 plt.xticks(regiao_ano.index)
