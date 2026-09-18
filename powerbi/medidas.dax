@@ -1,23 +1,24 @@
 // Medidas DAX: Desafio Manchester Investimentos
-// Criar cada uma em Modelagem > Nova Medida, na tabela "vendas"
+// Criar cada uma em Modelagem > Nova Medida, na tabela "vendas_powerbi"
+// (nomes de tabela seguem os CSVs importados: vendas_powerbi e categorias_powerbi)
 // Comentario com // explica o que a medida faz e por que
 
 // KPI principal: soma direta da coluna ja calculada em Python
 // (quantidade_vendida * preco_unitario), evita recalcular no DAX
-Faturamento Total = SUM(vendas[faturamento])
+Faturamento Total = SUM(vendas_powerbi[faturamento])
 
 // Volume total de unidades vendidas
-Volume Total = SUM(vendas[quantidade_vendida])
+Volume Total = SUM(vendas_powerbi[quantidade_vendida])
 
 // Ticket medio por transacao (linha da base), nao por cliente
-Ticket Medio = DIVIDE([Faturamento Total], COUNTROWS(vendas))
+Ticket Medio = DIVIDE([Faturamento Total], COUNTROWS(vendas_powerbi))
 
 // Numero de transacoes (linhas), util pra comparar com volume
-Qtd Transacoes = COUNTROWS(vendas)
+Qtd Transacoes = COUNTROWS(vendas_powerbi)
 
 // Clientes unicos, DISTINCTCOUNT evita contar o mesmo cliente
 // mais de uma vez (cada cliente aparece em varias linhas de venda)
-Qtd Clientes = DISTINCTCOUNT(vendas[cliente])
+Qtd Clientes = DISTINCTCOUNT(vendas_powerbi[cliente])
 
 // % que a categoria selecionada representa do faturamento total,
 // ALLSELECTED ignora o filtro de categoria mas respeita outros
@@ -25,5 +26,5 @@ Qtd Clientes = DISTINCTCOUNT(vendas[cliente])
 % do Faturamento Total =
 DIVIDE(
     [Faturamento Total],
-    CALCULATE([Faturamento Total], ALLSELECTED(categorias_produtos[categoria]))
+    CALCULATE([Faturamento Total], ALLSELECTED(categorias_powerbi[categoria]))
 )

@@ -30,7 +30,7 @@ números batem entre elas, que é um dos critérios de avaliação do desafio.
   nunca sobrepostos na mesma linha) não foram descartados da base geral,
   cada análise ignora só as linhas que precisam do campo que falta.
 - **Perfil demográfico por cliente único:** idade e estado são atributos do
-  cliente, não da transação. Verifiquei que nenhum dos 79.840 clientes
+  cliente, não da transação. Verifiquei que nenhum dos 79.838 clientes
   únicos tem mais de uma idade ou estado registrado, então agreguei por
   `cliente` antes de descrever a distribuição, pra não enviesar pelo volume
   de compras de cada um.
